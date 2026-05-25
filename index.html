@@ -22,6 +22,8 @@ header{background:var(--ink);color:var(--paper);padding:14px 20px;display:flex;a
 .header-right{text-align:right;flex-shrink:0}
 .date-display{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:6px}
 .cart-btn{background:var(--gold);color:white;border:none;padding:7px 14px;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:0.8rem;letter-spacing:0.08em;cursor:pointer;transition:background 0.2s;display:inline-flex;align-items:center;gap:6px}
+.install-btn{background:transparent;color:var(--gold-light);border:1px solid var(--gold);padding:7px 14px;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:0.8rem;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;display:none;align-items:center;gap:6px;margin-bottom:6px}
+.install-btn:hover{background:var(--gold);color:white}
 .cart-btn:hover{background:var(--gold-light)}
 .cart-count{background:white;color:var(--gold);border-radius:50%;width:19px;height:19px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:0.7rem}
 .instructions{background:var(--cream);border-bottom:1px solid #ddd6cc;padding:11px 20px;font-size:0.78rem;color:#776a5e;letter-spacing:0.03em}
@@ -107,6 +109,10 @@ header{background:var(--ink);color:var(--paper);padding:14px 20px;display:flex;a
   </div>
 </header>
 <div class="instructions">✦ Selecciona los modelos que deseas · Elige la cantidad · Envía tu pedido</div>
+<div id="install-banner" style="display:none;background:#2a1f14;padding:10px 20px;text-align:center;">
+  <button id="install-btn" onclick="installApp()" style="background:var(--gold);color:white;border:none;padding:8px 20px;border-radius:3px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;letter-spacing:0.05em;">⬇ Instalar app en tu celular</button>
+  <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:#888;cursor:pointer;font-size:1rem;margin-left:10px;">✕</button>
+</div>
 <div id="loading"><div class="spinner"></div><span>Cargando catálogo...</span></div>
 <div id="error-msg"></div>
 <div id="gallery"><div class="gallery-grid" id="gallery-grid"></div></div>
@@ -149,6 +155,31 @@ let allImages=[];
 let loadedCount=0;
 let imgObserver;
 let scrollObserver;
+
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'block';
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').style.display = 'none';
+  deferredPrompt = null;
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-btn').style.display = 'none';
+    });
+  } else {
+    alert('Para instalar: menú del navegador (⋮) → Agregar a pantalla de inicio');
+  }
+}
 
 window.addEventListener('load',()=>{updateDate();setInterval(updateDate,60000);loadImages();});
 
